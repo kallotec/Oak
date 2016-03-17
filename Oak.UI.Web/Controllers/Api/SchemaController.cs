@@ -20,7 +20,7 @@ namespace Oak.UI.Web.Controllers.Api
     {
         public SchemaController(GraphService GraphService)
         {
-			graphService = GraphService;
+            graphService = GraphService;
 		}
 
 		GraphService graphService;

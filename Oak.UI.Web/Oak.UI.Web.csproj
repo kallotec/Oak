@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\highlight.min.js" />
+    <Content Include="Scripts\joint.polyfills.js" />
     <Content Include="Styles\bootstrap.fixes.css" />
     <Content Include="Styles\highlight.zenburn.css" />
     <Content Include="Styles\highlight.min.css" />

@@ -4,6 +4,8 @@
 
 Searchable database object dependency visualizer tool for MS SQL Server.
 
+![Oak screenshot](http://kallotec.io/assets/images/projects/oak.png "Oak screenshot")
+
 ## Getting started
 
 In Web.config, update the connection string called `db` with a connection string to the database you'd like to analyze. And check that the cache time AppSettings value `cacheTimeInMinutes` is suitable.

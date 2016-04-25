@@ -14,5 +14,6 @@ namespace Oak.Domain.Models
         }
 
         public List<DbObject> Objects { get; set; }
+        public DateTime CapturedUtc { get; set; }
     }
 }

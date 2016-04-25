@@ -5,6 +5,7 @@ using System.Web.Http;
 using System.Configuration;
 using Oak.Domain.Services;
 using Oak.Domain.Data;
+using Oak.UI.Web.Controllers.Api;
 
 namespace Oak.UI.Web.App_Start
 {
@@ -39,18 +40,23 @@ namespace Oak.UI.Web.App_Start
             // NOTE: To load from web.config uncomment the line below. Make sure to add a Microsoft.Practices.Unity.Configuration to the using statements.
             // container.LoadConfiguration();
 
-			//config
+			// Config
 			Uri graphDbUrl = null;
-			string sqlConnString = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
-			bool persistToGraphDb = false;
+			var sqlConnString = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
+            var persistToGraphDb = false;
 
-            //data
-            //ISchemaFactory dbObjService = new MockDbSchemaGenerator(pathToSpsFile, pathToRefsFile);
+            // Data
             ISchemaFactory dbObjService = new DbSchemaFactory(graphDbUrl, sqlConnString, persistToGraphDb);
 			container.RegisterInstance(dbObjService);
 
-			//services
-			container.RegisterType<GraphService>();
+            // Services
+            container.RegisterType<GraphService>();
+
+            // Controllers
+            container.RegisterType<SchemaController>(
+                new InjectionConstructor(
+                    int.Parse(ConfigurationManager.AppSettings["cacheTimeInMinutes"]),
+                    container.Resolve<GraphService>() ));
 
         }
 

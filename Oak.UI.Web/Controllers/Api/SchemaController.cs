@@ -18,39 +18,72 @@ namespace Oak.UI.Web.Controllers.Api
     [RoutePrefix("api/schema")]
     public class SchemaController : ApiController
     {
-        public SchemaController(GraphService GraphService)
+        public SchemaController(int cacheTimeInMins, GraphService graphService)
         {
-            graphService = GraphService;
-		}
+            this.cacheLife = TimeSpan.FromMinutes(cacheTimeInMins);
+            this.graphService = graphService;
+        }
 
-		GraphService graphService;
+        const string CACHEKEY = "graphCache";
+        
+        GraphService graphService;
+        TimeSpan cacheLife;
+        DbGraph cachedGraph
+        {
+            get
+            {
+                var cachedValue = HttpContext.Current.Application[CACHEKEY] as DbGraph;
+                if (cachedValue == null)
+                    return null;
 
+                // Test cache expiry
+                // If expired, return null - signalling to program cache is empty and value will be updated
+                if ((cachedValue.CapturedUtc + cacheLife) < DateTime.UtcNow)
+                    return null;
+
+                return cachedValue;
+            }
+            set
+            {
+                HttpContext.Current.Application[CACHEKEY] = value;
+            }
+        }
 
 		// GET api/schema/dependencytree/?objName={value}
         [HttpGet]
         [Route("dependencytree")]
 		public async Task<IHttpActionResult> GetDependencyTree(string objName)
         {
-			try 
-			{
-				//generate graph table
-				var graph = await graphService.GenerateGraph();
-				var callTree = new CallTreeData();
+			try
+            {
+                var callTree = new CallTreeData();
 
-				if (string.IsNullOrEmpty(objName))
-					return Ok(callTree);
+                // Validation - require query
+                if (string.IsNullOrEmpty(objName))
+                    return Ok(callTree);
 
-				//get call tree from object if found
+                // Try get graph from cache
+                DbGraph graph = cachedGraph;
+
+                // Load graph if not cached
+                if (graph == null)
+                {
+                    graph = await graphService.GenerateGraph();
+                    cachedGraph = graph; // Persist to cache
+                }
+
+				// Get call tree from object if found
 				var obj = await graphService.GetCallTree(objName);
 				if (obj != null) {
 					var dic = new Dictionary<string, string[]>();
 					buildDependencyDic(obj, dic);
 
-					foreach (var entry in dic) {
-						//add object entry
+					foreach (var entry in dic)
+                    {
+						// Add object entry
 						callTree.objects.Add(entry.Key, entry.Value);
 
-						//add meta data entry for object
+						// Add meta data entry for object
 						var item = graph.Objects.FirstOrDefault(o => o.Name == entry.Key);
 						if (item != null)
 							callTree.metadata.Add(entry.Key, new ObjectData { type = item.ObjectTypeKey });
@@ -112,7 +145,8 @@ namespace Oak.UI.Web.Controllers.Api
         // GET api/schema/environments
         [HttpGet]
         [Route("environments")]
-        public async Task<IHttpActionResult> GetEnvironments() {
+        public IHttpActionResult GetEnvironments()
+        {
 			try 
 			{ 
 				var conns = getAllConnectionStringNames();
@@ -135,115 +169,18 @@ namespace Oak.UI.Web.Controllers.Api
                 return;
 
             foreach (var dependency in obj.DependsOn) 
-			{
 				buildDependencyDic(dependency, dic);
-            }
 
         }
-
-        //// GET api/graphing/calltree/?spName={value}
-        //[HttpGet]
-        //[Route("calltree")]
-        //public async Task<IHttpActionResult> GetCallTree(string spName)
-        //{
-        //    //config values
-        //    var sqlConnString = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
-
-        //    //generate graph table
-        //    var sp = await graphService.GetCallTree(spName);
-
-        //    //handle no results found
-        //    if (sp == null)
-        //        return Ok(new { });
-
-        //    var top = new CallTreeItem(sp.Name);
-        //    top.children = getChildren(sp);
-
-        //    return Ok(top);
-        //}
-
-        //[HttpGet]
-        //[Route("schema2")]
-        //public async Task<IHttpActionResult> GetSchema2()
-        //{
-        //    //config values
-        //    var sqlConnString = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
-
-        //    //generate graph table
-        //    var schema = await graphService.GenerateSchemaAsync();
-
-
-        //    var nodes = new List<NodeResult>();
-        //    var rels = new List<object>();
-        //    int i = 0, sourceIndex;
-
-        //    foreach (var item in schema.Objects)
-        //    {
-        //        nodes.Add(new NodeResult { title = item.fullName, label = "SP" });
-        //        sourceIndex = i;
-        //        i++;
-
-        //        var references = schema.References.Where(r => r.from == item.name);
-
-        //        foreach (var refr in references)
-        //        {
-        //            var targetIndex = nodes.FindIndex(n => n.title == refr.to);
-        //            if (targetIndex == -1)
-        //            {
-        //                nodes.Add(new NodeResult { title = refr.to, label = "actor" });
-        //                targetIndex = i;
-        //                i += 1;
-        //            }
-
-        //            rels.Add(new { source = sourceIndex, target = targetIndex });
-        //        }
-        //    }
-
-        //    return Ok(new { nodes = nodes, links = rels });
-        //}
-
-        //// GET api/graphing/schema
-        //[HttpGet]
-        //[Route("schema3")]
-        //public async Task<IHttpActionResult> GetSchema3()
-        //{
-        //    //generate graph table
-        //    var schema = await graphService.GenerateSchemaAsync();
-
-        //    var nodes = new List<Node>();
-
-        //    foreach (var item in schema.Objects)
-        //    {
-        //        var node = new Node(item.fullName, "SP");
-
-        //        var dependencies = schema.References.Where(r => r.fromFullName == item.fullName);
-        //        var dependedOnBy = schema.References.Where(r => r.toFullName == item.fullName);
-
-        //        node.depends.AddRange(dependencies.Select(r => r.toFullName));
-        //        node.dependedOnBy.AddRange(dependedOnBy.Select(r => r.fromFullName));
-
-        //        nodes.Add(node);
-        //    }
-
-        //    var dataDic = new Dictionary<string, object>();
-
-        //    foreach (var node in nodes)
-        //        dataDic.Add(node.name, node);
-
-        //    var data = new { data = dataDic, errors = new List<string>() };
-
-        //    return Ok(data);
-        //}
 
         List<string> getAllConnectionStringNames()
         {
             var conns = new List<string>();
 
-            foreach (var conn in ConfigurationManager.ConnectionStrings)
-            {
-                break;
-            }
-
+            // Capture names of all connection strings
+            foreach (ConnectionStringSettings conn in ConfigurationManager.ConnectionStrings)
+                conns.Add(conn.Name);
+            
             return conns;
         }
 

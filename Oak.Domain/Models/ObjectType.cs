@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Oak.Domain.Models 
 {
-	public enum ObjectType {
+	public enum ObjectType
+    {
 		Unknown = 0,
 		StoredProc = 1,
 		Table = 2,

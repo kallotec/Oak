@@ -96,6 +96,7 @@ namespace Oak.Domain.Services
             var graphObj = new DbGraph
             {
                 Objects = graph,
+                CapturedUtc = DateTime.UtcNow,
             };
 
             return graphObj;

@@ -62,8 +62,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\MockDbSchemaGenerator.cs" />
-    <Compile Include="Data\DgmlGenerator.cs" />
-    <Compile Include="Data\SchemaRepository.cs" />
     <Compile Include="Data\ISchemaFactory.cs" />
     <Compile Include="Mapping\Mapper.cs" />
     <Compile Include="Models\DbGraph.cs" />

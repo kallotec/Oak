@@ -7,8 +7,6 @@ using System.Text;
 using Dapper;
 using System.Threading.Tasks;
 using Oak.Domain.Models;
-using Neo4jClient;
-using Neo4jClient.Cypher;
 
 namespace Oak.Domain.Data
 {

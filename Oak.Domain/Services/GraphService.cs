@@ -10,6 +10,8 @@ using Oak.Domain.Models;
 
 namespace Oak.Domain.Services
 {
+    public enum CallTreeDirection { Down, Up }
+
     public class GraphService
     {
 		public GraphService(ISchemaFactory SchemaGenerator)
@@ -20,18 +22,23 @@ namespace Oak.Domain.Services
         ISchemaFactory schemaGenerator;
 
 
-        public async Task<DbObject> GetCallTree(string spName)
+        public async Task<List<DbObject>> GetCallTree(string spName, CallTreeDirection direction)
         {
             var graph = await GenerateGraph();
             var tested = new List<string>();
 
-            foreach (var obj in graph.Objects)
+            if (direction == CallTreeDirection.Up)
             {
-                if (obj.Name == spName)
-                    return obj;
+                var newObjectList = trimForUpwardOnlyReferences(graph.Objects, spName);
+                graph.Objects = newObjectList;
+                return graph.Objects;
+            }
+            else
+            {
+                var rootObj = graph.Objects.FirstOrDefault(o => o.Name == spName);
+                return new List<DbObject> { rootObj };
             }
 
-            return null;
         }
 
 		public Task<string> GetDefinition(string objName) 
@@ -108,6 +115,44 @@ namespace Oak.Domain.Services
             return schema;
         }
 
+        List<DbObject> trimForUpwardOnlyReferences(List<DbObject> list, string objectName)
+        {
+            if (list == null)
+                return new List<DbObject>();
+
+            var target = list.FirstOrDefault(l => l.Name == objectName);
+            if (target == null)
+                return list;
+
+            var dependentObjNames = new List<string>();
+            getDependentObjectsNames(target, dependentObjNames);
+
+            // Remove all redundant dependent links
+            list.ForEach(r =>
+            {
+                for (int x = 0; x < r.DependsOn.Count; x++)
+                {
+                    var obj = r.DependsOn[x];
+                    if (!dependentObjNames.Contains(obj.Name))
+                    {
+                        r.DependsOn.RemoveAt(x);
+                        x--;
+                    }
+                }
+                
+            });
+
+            // Only get dependent links
+            var results = list.Where(l => dependentObjNames.Contains(l.Name)).ToList();
+
+            return results;
+        }
+
+        void getDependentObjectsNames(DbObject obj, List<string> collector)
+        {
+            collector.Add(obj.Name);
+            obj.DependedOnBy.ForEach(d => getDependentObjectsNames(d, collector));
+        }
 
 	}
 }

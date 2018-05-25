@@ -10,33 +10,43 @@
 		</div>
 
 		<div id="controls">
-			<div id="autocomplete-box" class="input-group">
+            <div id="autocomplete-box" class="input-group">
 
-				<!--logo-->
-				<div id="logo">
-					<img src="~/Images/oak-logo.jpg" />
-				</div>
+                <!--logo-->
+                <div id="logo">
+                    <img src="~/Images/oak-logo.jpg" />
+                </div>
 
-				<!-- Split button
-				<div class="btn-group">
-					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						Dev <span class="caret"></span>
-					</button>
-					<ul class="dropdown-menu">
-						<li><a href="#">Environment changer coming soon</a></li>
-					</ul>
-				</div> -->
+                <!--search box-->
+                <div class="typeahead-box">
+                    <input type="text" id="autocomplete" class="typeahead form-control" placeholder="Search for a database object"
+                           onkeypress="if (event.keyCode == 13) { loadGraph(); };" />
+                </div>
 
-				<!--search box-->
-				<div class="typeahead-box">
-					<input type="text" id="autocomplete" class="typeahead form-control" placeholder="Search for a database object"
-						   onkeypress="if (event.keyCode == 13) { loadGraph(); };" />
-				</div>
+                <!-- direction -->
+                <div style="display: inline-block;">
 
-				<!--generate button-->
-				<button class="btn btn-primary" type="button" onclick="javascript:loadGraph();">View</button>
+                    <select id="direction-selector" class="form-control">
+                        <option selected value="0">Walk down</option>
+                        <option value="1">Walk up</option>
+                    </select>
 
-			</div>
+                </div>
+
+                <!-- layout -->
+                <div style="display: inline-block;">
+
+                    <select id="layout-selector" class="form-control">
+                        <option selected value="UD">Vertical</option>
+                        <option value="LR">Horizontal</option>
+                    </select>
+
+                </div>
+
+                <!--generate button-->
+                <button class="btn btn-primary" type="button" onclick="javascript:loadGraph();">View</button>
+
+            </div>
 			<div id="loading-text"></div>
 		</div>
 
@@ -276,7 +286,8 @@
             }
 
             //build url with parameter
-        	var dataUrl = callTreeDataUrl + encodeURIComponent(objName);
+            var direction = $("#direction-selector").val();
+            var dataUrl = callTreeDataUrlFormat.replace("{0}", encodeURIComponent(objName)).replace("{1}", direction);
         	console.log(dataUrl);
 
             try
@@ -295,7 +306,7 @@
         	            //generate graph from data
         	            var cells = buildGraphFromAdjacencyList(objects);
         	            graph.resetCells(cells);
-        	            joint.layout.DirectedGraph.layout(graph, { setLinkVertices: false });
+        	            joint.layout.DirectedGraph.layout(graph, { setLinkVertices: false, rankDir: $("#layout-selector").val() });
 
                         //count entries in data (they're declared as properties but used as a dictionary, this is due to requisite adjacency list format)
         	            var objCount = _.size(objects);
@@ -484,7 +495,7 @@
         //configuration
         var smoothLinks = true;
         var autoCompleteDataUrl = "api/schema/autocomplete";
-        var callTreeDataUrl = "api/schema/dependencytree/?objName="
+        var callTreeDataUrlFormat = "api/schema/dependencytree/?objName={0}&direction={1}"
         var definitionDataUrl = "api/schema/definition/?objName="
 
         var graph;

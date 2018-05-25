@@ -25,7 +25,7 @@ namespace Oak.UI.Web.Controllers.Api
         }
 
         const string CACHEKEY = "graphCache";
-        
+
         GraphService graphService;
         TimeSpan cacheLife;
         DbGraph cachedGraph
@@ -49,12 +49,12 @@ namespace Oak.UI.Web.Controllers.Api
             }
         }
 
-		// GET api/schema/dependencytree/?objName={value}
+        // GET api/schema/dependencytree/?objName={objName}&direction={direction}
         [HttpGet]
         [Route("dependencytree")]
-		public async Task<IHttpActionResult> GetDependencyTree(string objName)
+        public async Task<IHttpActionResult> GetDependencyTree(string objName, int direction)
         {
-			try
+            try
             {
                 var callTree = new CallTreeData();
 
@@ -72,55 +72,56 @@ namespace Oak.UI.Web.Controllers.Api
                     cachedGraph = graph; // Persist to cache
                 }
 
-				// Get call tree from object if found
-				var obj = await graphService.GetCallTree(objName);
-				if (obj != null) {
-					var dic = new Dictionary<string, string[]>();
-					buildDependencyDic(obj, dic);
+                // Get call tree from object if found
+                var obj = await graphService.GetCallTree(objName, (CallTreeDirection)direction);
+                if (obj != null)
+                {
+                    var dic = new Dictionary<string, string[]>();
+                    buildDependencyDic(obj, dic);
 
-					foreach (var entry in dic)
+                    foreach (var entry in dic)
                     {
-						// Add object entry
-						callTree.objects.Add(entry.Key, entry.Value);
+                        // Add object entry
+                        callTree.objects.Add(entry.Key, entry.Value);
 
-						// Add meta data entry for object
-						var item = graph.Objects.FirstOrDefault(o => o.Name == entry.Key);
-						if (item != null)
-							callTree.metadata.Add(entry.Key, new ObjectData { type = item.ObjectTypeKey });
-					}
-				}
+                        // Add meta data entry for object
+                        var item = graph.Objects.FirstOrDefault(o => o.Name == entry.Key);
+                        if (item != null)
+                            callTree.metadata.Add(entry.Key, new ObjectData { type = item.ObjectTypeKey });
+                    }
+                }
 
-				return Ok(callTree);
-			} 
-			catch (Exception ex) 
-			{
-				return InternalServerError(ex);
-			}
+                return Ok(callTree);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
-		// GET api/schema/defintion/?objName={value}
-		[HttpGet]
-		[Route("definition")]
-		public async Task<IHttpActionResult> GetDefinition(string objName) 
-		{
-			try 
-			{
-				//generate graph table
-				var definition = new ObjectDefinition();
+        // GET api/schema/defintion/?objName={value}
+        [HttpGet]
+        [Route("definition")]
+        public async Task<IHttpActionResult> GetDefinition(string objName)
+        {
+            try
+            {
+                //generate graph table
+                var definition = new ObjectDefinition();
 
-				if (string.IsNullOrEmpty(objName))
-					return Ok(definition);
+                if (string.IsNullOrEmpty(objName))
+                    return Ok(definition);
 
-				//get object definition from db
-				definition.DefinitionText = await graphService.GetDefinition(objName);
+                //get object definition from db
+                definition.DefinitionText = await graphService.GetDefinition(objName);
 
-				return Ok(definition);
-			} 
-			catch (Exception ex) 
-			{
-				return InternalServerError(ex);
-			}
-		}
+                return Ok(definition);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
 
 
         // GET api/schema/autocomplete
@@ -128,17 +129,17 @@ namespace Oak.UI.Web.Controllers.Api
         [Route("autocomplete")]
         public async Task<IHttpActionResult> GetAutocomplete()
         {
-			try 
-			{
-				//get results of search
-				var results = await graphService.GetAutocompleteObjectList();
+            try
+            {
+                //get results of search
+                var results = await graphService.GetAutocompleteObjectList();
 
-				return Ok(results);
-			} 
-			catch (Exception ex) 
-			{
-				return InternalServerError(ex);
-			}
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
 
@@ -147,29 +148,35 @@ namespace Oak.UI.Web.Controllers.Api
         [Route("environments")]
         public IHttpActionResult GetEnvironments()
         {
-			try 
-			{ 
-				var conns = getAllConnectionStringNames();
-				return Ok(conns);
-			} 
-			catch (Exception ex) 
-			{
-				return InternalServerError(ex);
-			}
+            try
+            {
+                var conns = getAllConnectionStringNames();
+                return Ok(conns);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
 
-		void buildDependencyDic(DbObject obj, Dictionary<string, string[]> dic)
+        void buildDependencyDic(List<DbObject> objs, Dictionary<string, string[]> dic)
         {
-			Debug.WriteLine("Processing: " + obj.Name);
+            foreach (var obj in objs)
+                buildDependencyDic(obj, dic);
+        }
+
+        void buildDependencyDic(DbObject obj, Dictionary<string, string[]> dic)
+        {
+            Debug.WriteLine("Processing: " + obj.Name);
 
             if (dic.ContainsKey(obj.Name) == false)
                 dic.Add(obj.Name, obj.DependsOn.Select(d => d.Name).ToArray());
             else
                 return;
 
-            foreach (var dependency in obj.DependsOn) 
-				buildDependencyDic(dependency, dic);
+            foreach (var dependency in obj.DependsOn)
+                buildDependencyDic(dependency, dic);
 
         }
 
@@ -180,7 +187,7 @@ namespace Oak.UI.Web.Controllers.Api
             // Capture names of all connection strings
             foreach (ConnectionStringSettings conn in ConfigurationManager.ConnectionStrings)
                 conns.Add(conn.Name);
-            
+
             return conns;
         }
 

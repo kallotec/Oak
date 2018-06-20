@@ -52,7 +52,10 @@ namespace Oak.Domain.Services
 
 			//only return SP's in autocomplete list
             var filteredToSps = graph.Objects
-									 .Where(o => o.ObjectType == ObjectType.StoredProc || o.ObjectType == ObjectType.Function)
+									 .Where(o => o.ObjectType == ObjectType.StoredProc || 
+                                                 o.ObjectType == ObjectType.Function || 
+                                                 o.ObjectType == ObjectType.Table || 
+                                                 o.ObjectType == ObjectType.View)
 									 .Select(o => o.Name)
 									 .ToList();
 			return filteredToSps;

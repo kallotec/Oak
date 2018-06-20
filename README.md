@@ -13,3 +13,9 @@ In Web.config, update the connection string called `db` with a connection string
 ## Common sense
 
 Consider using a sql login with minimal permissions in this connection string. And it should go without saying this tool shouldn't be visible from outside of your local intranet.
+
+## Roadmap
+- [ ] performance: caching of schema data
+- [ ] query option: return first-level nodes only 
+- [ ] definitions on double-click of tables/views
+- [ ] tables and views in autocomplete list

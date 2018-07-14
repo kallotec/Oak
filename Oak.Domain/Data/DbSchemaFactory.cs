@@ -131,7 +131,7 @@ namespace Oak.Domain.Data
         }
 
 		string getQuery_ObjDefinition(string objectName) {
-			return @"sp_helptext '" + objectName + "'";
+			return @"select OBJECT_DEFINITION(object_id('" + objectName + "'))";
 		}
 
     }

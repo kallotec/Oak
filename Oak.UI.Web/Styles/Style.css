@@ -9,7 +9,7 @@ html, body {
     cursor: pointer;
 }
 
-#app {
+#search-box-container {
     position: absolute;
     top: 0;
     left: 0;
@@ -46,6 +46,19 @@ html, body {
     background-color: #fff;
     padding: 5px;
     width: 500px;
+}
+
+#autocomplete-ui table {
+    min-width: 100%;
+    width: 100%;
+}
+
+#autocomplete-ui td label {
+    padding: 5px;
+    background-color: #ddd;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
 }
 
 

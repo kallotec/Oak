@@ -12,7 +12,10 @@ var app = new Vue({
         selectedLayoutDirection: 'LR',
         message: '',
         showAutocomplete: false,
-        autocompleteFilterType: -1,
+        filterShowProcs: true,    // typeId: 1
+        filterShowTables: true,   // typeId: 2
+        filterShowViews: true,    // typeId: 3
+        filterShowFunctions: true, // typeId: 4
         autocompleteListFull: [],
         autocompleteListFiltered: [],
         currDefinitionText: ''
@@ -30,13 +33,24 @@ var app = new Vue({
 
     },
     watch: {
+        searchText: function (val) {
+            this.filterAutocomplete();
+        },
         selectedLayoutDirection: function (val) {
             // update graph settings
             graphComponent.direction = val;
         },
-        autocompleteFilterType: function (val) {
-            // filter autocomplete list
-            //autocompleteListFiltered = ;
+        filterShowProcs: function (val) {
+            this.filterAutocomplete();
+        },
+        filterShowTables: function (val) {
+            this.filterAutocomplete();
+        },
+        filterShowViews: function (val) {
+            this.filterAutocomplete();
+        },
+        filterShowFunctions: function (val) {
+            this.filterAutocomplete();
         }
     },
     methods: {
@@ -53,7 +67,7 @@ var app = new Vue({
             console.log(dataUrl);
 
             try {
-                this.displayMessage("Getting tree data...");
+                this.displayMessage("Searching...");
 
                 //get graph json
                 $.getJSON(dataUrl, function (data) {
@@ -61,7 +75,7 @@ var app = new Vue({
                 });
 
             } catch (e) {
-                this.displayMessage("Getting tree data failed.");
+                this.displayMessage("Search failed.");
                 throw e;
             }
 
@@ -69,7 +83,7 @@ var app = new Vue({
         loadDef: function (objName) {
 
             //need at least 2 characters in box to search on
-            if(objName.length < 2) {
+            if (objName.length < 2) {
                 return;
             }
 
@@ -102,7 +116,7 @@ var app = new Vue({
                         me.showDefinition("50%");
                     });
 
-            } catch(e) {
+            } catch (e) {
                 this.displayMessage("Getting definition data failed.");
                 throw e;
             }
@@ -139,28 +153,6 @@ var app = new Vue({
 
             var me = this;
 
-            //var substringMatcher = function (strs) {
-            //    return function findMatches(q, cb) {
-            //        var matches, substringRegex;
-
-            //        // an array that will be populated with substring matches
-            //        matches = [];
-
-            //        // regex used to determine if a string contains the substring 'q'
-            //        substrRegex = new RegExp(q, 'i');
-
-            //        // iterate through the pool of strings and for any string that
-            //        // contains the substring 'q', add it to the 'matches' array
-            //        $.each(strs, function (i, str) {
-            //            if (substrRegex.test(str)) {
-            //                matches.push(str);
-            //            }
-            //        });
-
-            //        cb(matches);
-            //    };
-            //};
-
             this.displayMessage("Loading autocomplete data...");
 
             $.getJSON(autoCompleteDataUrl, function (data) {
@@ -179,11 +171,44 @@ var app = new Vue({
                 }
             });
         },
+        filterAutocomplete: function () {
+
+            var matches = [];
+            var substrRegex = new RegExp(this.searchText, 'i');
+            var me = this;
+
+            $.each(this.autocompleteListFull, function (i, item) {
+                if (substrRegex.test(item.Name)) {
+                    var isMatch = (me.filterShowProcs && item.Type == 1)
+                        || (me.filterShowTables && item.Type == 2)
+                        || (me.filterShowViews && item.Type == 3)
+                        || (me.filterShowFunctions && item.Type == 4);
+                    if (isMatch) {
+                        matches.push(item);
+                    }
+                }
+            });
+
+            this.autocompleteListFiltered = matches;
+        },
+        onSuggestionClick: function (objName) {
+            this.searchText = objName;
+            this.search();
+            this.showAutocomplete = false;
+        },
+        searchFieldOnKeyUp: function (e) {
+            // 13: enter
+            if (e.keyCode === 13) {
+                this.showAutocomplete = false;
+                this.search();
+            } else {
+                if (!this.showAutocomplete)
+                    this.showAutocomplete = true;
+            }
+        },
         displayMessage: function (msg) {
             console.log(msg);
             this.message = msg;
         }
     }
 });
-
-

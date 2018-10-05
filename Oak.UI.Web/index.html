@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oak - MS SQL database object dependency visualizer</title>
-    <meta name="author" content="James H (github.com/kallotec)" />
-    <meta name="description" content="User friendly SQL database object dependency visualizer" />
+    <meta name="author" content="github.com/kallotec" />
+    <meta name="description" content="User friendly MS SQL database object dependency visualizer" />
     <!-- styles -->
     <link href="/Styles/bootstrap.min.css" rel="stylesheet" />
     <link href="/Styles/bootstrap.fixes.css" rel="stylesheet" />
@@ -25,14 +25,13 @@
 </head>
 <body>
 
-    <div>
+    <div id="pan-box" style="overflow: auto;">
+        <div id="paper"></div>
+    </div>
 
-        <div id="pan-box" style="overflow: auto;">
-            <div id="paper"></div>
-        </div>
+    <div id="app">
 
-        <div id="app">
-
+        <div id="search-box-container">
             <div id="search-box">
 
                 <div>
@@ -44,7 +43,7 @@
                     </div>
 
                     <div class="field">
-                        <input id="search-field" v-model="searchText" placeholder="Search for a database object" class="form-control">
+                        <input id="search-field" v-model="searchText" @keyup="searchFieldOnKeyUp" placeholder="Search for a database object" class="form-control">
                     </div>
 
                     <div class="field">
@@ -62,7 +61,7 @@
                     </div>
 
                     <div class="field">
-                        <button class="btn btn-primary" type="button" v-on:click="search">View</button>
+                        <button class="btn btn-primary" type="button" @click="search">View</button>
                     </div>
 
                 </div>
@@ -72,19 +71,38 @@
                 <!-- autocomplete -->
                 <div id="autocomplete-ui" v-if="showAutocomplete">
 
-                    <div class="field">
-                        <select v-model="autocompleteFilterType" class="form-control">
-                            <option selected value="-1">All</option>
-                            <option value="1">Stored procs</option>
-                            <option value="2">Tables</option>
-                            <option value="3">Views</option>
-                            <option value="3">Functions</option>
-                        </select>
-                    </div>
+                    <table>
+                        <tr>
+                            <td>
+                                <label for="filter-show-procs">
+                                    <input id="filter-show-procs" type="checkbox" v-model="filterShowProcs" />
+                                    Procs
+                                </label>
+                            </td>
+                            <td>
+                                <label for="filter-show-tables">
+                                    <input id="filter-show-tables" type="checkbox" v-model="filterShowTables" />
+                                    Tables
+                                </label>
+                            </td>
+                            <td>
+                                <label for="filter-show-views">
+                                    <input id="filter-show-views" type="checkbox" v-model="filterShowViews" />
+                                    Views
+                                </label>
+                            </td>
+                            <td>
+                                <label for="filter-show-functions">
+                                    <input id="filter-show-functions" type="checkbox" v-model="filterShowFunctions" />
+                                    Functions
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
 
                     <div id="autocomplete-results">
                         <ul>
-                            <li v-for="result in autocompleteListFiltered">
+                            <li v-for="result in autocompleteListFiltered" @click="onSuggestionClick(result.Name)">
                                 <span>{{result.Type}}</span>
                                 <span>{{result.Name}}</span>
                             </li>
@@ -93,23 +111,7 @@
                 </div>
 
             </div>
-
-            <!-- definition display-->
-            <div id="sp-definition-box">
-                <div id="sp-definition-controls">
-                    <button v-on:click="showDefinition('100%')">full</button>
-                    <button v-on:click="showDefinition('50%')">half</button>
-                    <button v-on:click="resetDefinitionWindow()">close</button>
-                </div>
-                <div id="sp-definition-display">
-                    <pre>
-                    <code class="sql"></code>
-                </pre>
-                </div>
-            </div>
-
         </div>
-
 
         <!--legend-->
         <div id="legend">
@@ -122,6 +124,20 @@
                 <strong>Tip:</strong> Double click database object to see its definition
             </div>
 
+        </div>
+
+        <!-- definition display-->
+        <div id="sp-definition-box">
+            <div id="sp-definition-controls">
+                <button v-on:click="showDefinition('100%')">full</button>
+                <button v-on:click="showDefinition('50%')">half</button>
+                <button v-on:click="resetDefinitionWindow()">close</button>
+            </div>
+            <div id="sp-definition-display">
+                <pre>
+                <code class="sql"></code>
+                </pre>
+            </div>
         </div>
 
     </div>

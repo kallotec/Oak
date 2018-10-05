@@ -36,7 +36,10 @@ namespace Oak.Domain.Services
             else
             {
                 var rootObj = graph.Objects.FirstOrDefault(o => o.Name == spName);
-                return new List<DbObject> { rootObj };
+                if (rootObj != null)
+                    return new List<DbObject> { rootObj };
+                else
+                    return new List<DbObject>();
             }
 
         }

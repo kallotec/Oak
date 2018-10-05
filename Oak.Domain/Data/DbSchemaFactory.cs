@@ -55,7 +55,8 @@ namespace Oak.Domain.Data
 			//get reference table from sql
 			using (IDbConnection conn = new SqlConnection(sqlConnString)) {
 
-				var reader = await conn.ExecuteReaderAsync(getQuery_ObjDefinition(objectName));
+                var query = getQuery_ObjDefinition(objectName);
+                var reader = await conn.ExecuteReaderAsync(query);
                 var sb = new StringBuilder();
 
                 while (reader.Read())
@@ -131,8 +132,9 @@ namespace Oak.Domain.Data
         }
 
 		string getQuery_ObjDefinition(string objectName) {
-			return @"select OBJECT_DEFINITION(object_id('" + objectName + "'))";
-		}
+            //return @"select OBJECT_DEFINITION(object_id('" + objectName + "'))";
+            return @"sp_helptext '" + objectName + "'";
+        }
 
     }
 }

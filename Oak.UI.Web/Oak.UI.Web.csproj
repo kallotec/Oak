@@ -19,6 +19,8 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <Use64BitIISExpress />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -139,6 +141,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="index.html" />
+    <Content Include="Scripts\app.js" />
+    <Content Include="Scripts\dbgraph.js" />
     <Content Include="Scripts\highlight.min.js" />
     <Content Include="Scripts\joint.polyfills.js" />
     <Content Include="Styles\bootstrap.fixes.css" />
@@ -162,9 +167,6 @@
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\typeahead.bundle.js" />
-    <Content Include="Views\Home\index.cshtml">
-      <SubType>Code</SubType>
-    </Content>
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -173,12 +175,11 @@
     <Compile Include="App_Start\UnityMvcActivator.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\Api\SchemaController.cs" />
-    <Compile Include="Controllers\HomeController.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Controllers\DefaultController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Api\AutocompleteResult.cs" />
     <Compile Include="Models\Api\CallTreeData.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -202,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Default\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Oak.Domain\Oak.Domain.csproj">

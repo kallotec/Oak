@@ -46,17 +46,15 @@ namespace Oak.Domain.Services
 			return schemaGenerator.GetDefinition(objName);
 		}
 
-		public async Task<List<string>> GetAutocompleteObjectList()
-		{
+        public async Task<List<DbObject>> GetAutocompleteObjectList(ObjectType? filter = null)
+        {
             var graph = await GenerateGraph();
 
-			//only return SP's in autocomplete list
+            //only return SP's in autocomplete list
             var filteredToSps = graph.Objects
-									 .Where(o => o.ObjectType == ObjectType.StoredProc || 
-                                                 o.ObjectType == ObjectType.Function || 
-                                                 o.ObjectType == ObjectType.Table || 
-                                                 o.ObjectType == ObjectType.View)
-									 .Select(o => o.Name)
+                                     .Where(o => (filter != null 
+                                        ? o.ObjectType == filter 
+                                        : o.ObjectType != ObjectType.Unknown))
 									 .ToList();
 			return filteredToSps;
 		}

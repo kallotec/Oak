@@ -127,14 +127,15 @@ namespace Oak.UI.Web.Controllers.Api
         // GET api/schema/autocomplete
         [HttpGet]
         [Route("autocomplete")]
-        public async Task<IHttpActionResult> GetAutocomplete()
+        public async Task<IHttpActionResult> GetAutocomplete(ObjectType? filter = null)
         {
             try
             {
                 //get results of search
-                var results = await graphService.GetAutocompleteObjectList();
+                var results = await graphService.GetAutocompleteObjectList(filter);
 
-                return Ok(results);
+                // map
+                return Ok(results.Select(r => r.Name));
             }
             catch (Exception ex)
             {
@@ -142,6 +143,28 @@ namespace Oak.UI.Web.Controllers.Api
             }
         }
 
+        // GET api/schema/autocomplete
+        [HttpGet]
+        [Route("autocomplete2")]
+        public async Task<IHttpActionResult> GetAutocomplete2(ObjectType? filter = null)
+        {
+            try
+            {
+                //get results of search
+                var results = await graphService.GetAutocompleteObjectList(filter);
+
+                // map
+                return Ok(results.Select(r => new AutocompleteResult
+                {
+                    Type = r.ObjectType,
+                    Name = r.Name
+                }));
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
 
         // GET api/schema/environments
         [HttpGet]

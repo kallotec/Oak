@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oak - MS SQL database object dependency visualizer</title>
+    <meta name="author" content="James H (github.com/kallotec)" />
+    <meta name="description" content="User friendly SQL database object dependency visualizer" />
+    <!-- styles -->
+    <link href="/Styles/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Styles/bootstrap.fixes.css" rel="stylesheet" />
+    <link href="/Styles/joint.min.css" rel="stylesheet" />
+    <link href="/Styles/typeahead.css" rel="stylesheet" />
+    <link href="/Styles/Style.css" rel="stylesheet" />
+    <link href="/Styles/highlight.min.css" rel="stylesheet" />
+    <link href="/Styles/highlight.zenburn.css" rel="stylesheet" />
+    <!-- scripts -->
+    <script src="/Scripts/joint.min.js"></script>
+    <script src="/Scripts/joint.layout.DirectedGraph.min.js"></script>
+    <script src="/Scripts/joint.polyfills.js"></script>
+    <script src="/Scripts/typeahead.bundle.js"></script>
+    <script src="/Scripts/bootstrap.min.js"></script>
+    <script src="/Scripts/highlight.min.js"></script>
+    <script src="/Scripts/dbgraph.js"></script>
+</head>
+<body>
+
+    <div>
+
+        <div id="pan-box" style="overflow: auto;">
+            <div id="paper"></div>
+        </div>
+
+        <div id="app">
+
+            <div id="search-box">
+
+                <div>
+
+                    <div class="field">
+                        <div id="logo">
+                            <img src="/Images/oak-logo.jpg" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <input id="search-field" v-model="searchText" placeholder="Search for a database object" class="form-control">
+                    </div>
+
+                    <div class="field">
+                        <select v-model="selectedWalkDirection" class="form-control">
+                            <option selected value="0">Walk down</option>
+                            <option value="1">Walk up</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <select v-model="selectedLayoutDirection" class="form-control">
+                            <option selected value="LR">Horizontal</option>
+                            <option value="UD">Vertical</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <button class="btn btn-primary" type="button" v-on:click="search">View</button>
+                    </div>
+
+                </div>
+
+                <div>{{ message }}</div>
+
+                <!-- autocomplete -->
+                <div id="autocomplete-ui" v-if="showAutocomplete">
+
+                    <div class="field">
+                        <select v-model="autocompleteFilterType" class="form-control">
+                            <option selected value="-1">All</option>
+                            <option value="1">Stored procs</option>
+                            <option value="2">Tables</option>
+                            <option value="3">Views</option>
+                            <option value="3">Functions</option>
+                        </select>
+                    </div>
+
+                    <div id="autocomplete-results">
+                        <ul>
+                            <li v-for="result in autocompleteListFiltered">
+                                <span>{{result.Type}}</span>
+                                <span>{{result.Name}}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- definition display-->
+            <div id="sp-definition-box">
+                <div id="sp-definition-controls">
+                    <button v-on:click="showDefinition('100%')">full</button>
+                    <button v-on:click="showDefinition('50%')">half</button>
+                    <button v-on:click="resetDefinitionWindow()">close</button>
+                </div>
+                <div id="sp-definition-display">
+                    <pre>
+                    <code class="sql"></code>
+                </pre>
+                </div>
+            </div>
+
+        </div>
+
+        <!--tips-->
+        <div id="tips">
+            <div class="tip"><strong>Tip:</strong> Double click database object to see its definition</div>
+        </div>
+
+        <!--legend-->
+        <div id="legend">
+            <div class="legend-proc">Stored Proc</div>
+            <div class="legend-function">Function</div>
+            <div class="legend-table">Table</div>
+            <div class="legend-view">View</div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="/Scripts/app.js"></script>
+
+</body>
+</html>

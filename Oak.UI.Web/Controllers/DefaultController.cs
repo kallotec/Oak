@@ -6,13 +6,12 @@ using System.Web.Mvc;
 
 namespace Oak.UI.Web.Controllers
 {
-    public class HomeController : Controller
+    public class DefaultController : Controller
     {
-        // GET: /Home/
+        // GET: Default
         public ActionResult Index()
         {
-            return View();
+            return Redirect("~/index.html");
         }
-
     }
 }

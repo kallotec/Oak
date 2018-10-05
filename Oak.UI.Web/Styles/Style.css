@@ -9,29 +9,60 @@ html, body {
     cursor: pointer;
 }
 
+#app {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    /*right: 0;*/
+}
+
+#search-box {
+    display: block;
+    background-color: #fff;
+    padding: 5px;
+}
+
+#search-box .field {
+    display: inline-block;
+}
+
+#search-field {
+    min-width: 100px;
+}
 
 #logo {
     display: inline-block;
     padding-right: 10px;
 }
+
 #logo img {
     width: 35px;
     height: 35px;
 }
 
+
+#autocomplete-ui {
+    display: inline-block;
+    background-color: #fff;
+    padding: 5px;
+    width: 500px;
+}
+
+#autocomplete-results {
+}
+
+
+
 #controls {
     position: relative;
-	width: 910px;
+    width: 1000px;
     float: left;
     background-color: #FFF;
     border: 1px solid #AAA;
-    -moz-box-shadow:    2px 2px 10px 2px #DDD;
+    -moz-box-shadow: 2px 2px 10px 2px #DDD;
     -webkit-box-shadow: 2px 2px 10px 2px #DDD;
-    box-shadow:         2px 2px 10px 2px #DDD;
-}
-
-#autocomplete-box {
-    padding: 10px;
+    box-shadow: 2px 2px 10px 2px #DDD;
 }
 
 #loading-text {
@@ -43,8 +74,11 @@ html, body {
 
 #pan-box {
     overflow: auto;
-    position: absolute; 
-    top:0; bottom:0; left:0; right:0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background-color: #FFF;
 }
 
@@ -53,21 +87,12 @@ html, body {
     border: 1px solid #CCC;
 }
 
-
-.typeahead-box {
-  display: inline-block;
-  width: 500px;
-}
-
-/* make search box longer */
-.twitter-typeahead {
-    width: 500px;
-}
-
-
 #sp-definition-box {
-    position: absolute; 
-    top:0; right:0; bottom: 0;
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
     opacity: 1;
     width: 50%;
     background-color: #3F3F3F;
@@ -86,6 +111,7 @@ html, body {
 #sp-definition-controls {
     text-align: center;
 }
+
 #sp-definition-controls button {
     background-color: #333;
     border: 1px solid #222;
@@ -110,50 +136,61 @@ html, body {
 
 /* legend */
 #legend {
-    position: absolute; 
-    bottom: 20px; right: 20px;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
     width: 150px;
     text-align: center;
 }
-#legend div {
-    padding: 2px;
-    margin: 2px;
-    border: 1px solid #111;
-}
-#legend .legend-proc {
-    background-color: #C6DDE6;
-}
-#legend .legend-table {
-    background-color: #D9D2B6;
-}
-#legend .legend-view {
-    background-color: #C9B0C9;
-}
-#legend .legend-function {
-    background-color: #CCC;
-}
+
+    #legend div {
+        padding: 2px;
+        margin: 2px;
+        border: 1px solid #111;
+    }
+
+    #legend .legend-proc {
+        background-color: #C6DDE6;
+    }
+
+    #legend .legend-table {
+        background-color: #D9D2B6;
+    }
+
+    #legend .legend-view {
+        background-color: #C9B0C9;
+    }
+
+    #legend .legend-function {
+        background-color: #CCC;
+    }
 
 /* tree objects base */
 .object-base {
     font-family: 'Open Sans', Arial;
 }
-.object-base rect {
-    stroke: #444;
-}
-.object-base text {
-    fill: #444;
-}
+
+    .object-base rect {
+        stroke: #444;
+    }
+
+    .object-base text {
+        fill: #444;
+    }
 
 /* individ tree objs */
 .object-P rect {
     fill: #C6DDE6;
 }
+
 .object-T rect {
     fill: #D9D2B6;
 }
+
 .object-V rect {
     fill: #C9B0C9;
 }
+
 .object-F rect {
     fill: #CCC;
 }

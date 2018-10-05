@@ -12,9 +12,8 @@ html, body {
 #app {
     position: absolute;
     top: 0;
-    bottom: 0;
     left: 0;
-    /*right: 0;*/
+    overflow: hidden;
 }
 
 #search-box {
@@ -49,9 +48,11 @@ html, body {
     width: 500px;
 }
 
-#autocomplete-results {
-}
 
+#message {
+    text-align:center;
+    color: #999;
+}
 
 
 #controls {
@@ -125,10 +126,6 @@ html, body {
 
 /* tips */
 #tips {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    width: 200px;
     text-align: center;
     background-color: #FFE;
     padding: 6px;

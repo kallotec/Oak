@@ -67,7 +67,7 @@
 
                 </div>
 
-                <div>{{ message }}</div>
+                <div id="message">{{ message }}</div>
 
                 <!-- autocomplete -->
                 <div id="autocomplete-ui" v-if="showAutocomplete">
@@ -110,10 +110,6 @@
 
         </div>
 
-        <!--tips-->
-        <div id="tips">
-            <div class="tip"><strong>Tip:</strong> Double click database object to see its definition</div>
-        </div>
 
         <!--legend-->
         <div id="legend">
@@ -121,6 +117,11 @@
             <div class="legend-function">Function</div>
             <div class="legend-table">Table</div>
             <div class="legend-view">View</div>
+
+            <div id="tip">
+                <strong>Tip:</strong> Double click database object to see its definition
+            </div>
+
         </div>
 
     </div>

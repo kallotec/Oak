@@ -11,7 +11,7 @@ var app = new Vue({
         selectedWalkDirection: 0,
         selectedLayoutDirection: 'LR',
         message: '',
-        showAutocomplete: true,
+        showAutocomplete: false,
         autocompleteFilterType: -1,
         autocompleteListFull: [],
         autocompleteListFiltered: [],

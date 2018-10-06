@@ -43,7 +43,7 @@
                     </div>
 
                     <div class="field">
-                        <input id="search-field" v-model="searchText" @keyup="searchFieldOnKeyUp" placeholder="Search for a database object" class="form-control">
+                        <input id="search-field" v-model="searchText" @keyup="onSearchFieldKeyUp" placeholder="Search for a database object" class="form-control">
                     </div>
 
                     <div class="field">
@@ -61,7 +61,7 @@
                     </div>
 
                     <div class="field">
-                        <button class="btn btn-primary" type="button" @click="search">View</button>
+                        <button class="btn btn-primary" type="button" @click="onSearchButtonClick">View</button>
                     </div>
 
                 </div>
@@ -73,25 +73,25 @@
 
                     <table>
                         <tr>
-                            <td>
+                            <td class="legend-proc">
                                 <label for="filter-show-procs">
                                     <input id="filter-show-procs" type="checkbox" v-model="filterShowProcs" />
                                     Procs
                                 </label>
                             </td>
-                            <td>
+                            <td class="legend-table">
                                 <label for="filter-show-tables">
                                     <input id="filter-show-tables" type="checkbox" v-model="filterShowTables" />
                                     Tables
                                 </label>
                             </td>
-                            <td>
+                            <td class="legend-view">
                                 <label for="filter-show-views">
                                     <input id="filter-show-views" type="checkbox" v-model="filterShowViews" />
                                     Views
                                 </label>
                             </td>
-                            <td>
+                            <td class="legend-function">
                                 <label for="filter-show-functions">
                                     <input id="filter-show-functions" type="checkbox" v-model="filterShowFunctions" />
                                     Functions
@@ -102,9 +102,12 @@
 
                     <div id="autocomplete-results">
                         <ul>
-                            <li v-for="result in autocompleteListFiltered" @click="onSuggestionClick(result.Name)">
-                                <span>{{result.Type}}</span>
-                                <span>{{result.Name}}</span>
+                            <li class="autocomplete-result" v-for="result in autocompleteListFiltered" @click="onSuggestionClick(result.Name)">
+                                <span class="name">{{result.Name}}</span>
+                                <span class="type"
+                                      v-bind:class="{ 'legend-text-1': result.Type == 1, 'legend-text-2': result.Type == 2, 'legend-text-3': result.Type == 3, 'legend-text-4': result.Type == 4 }">
+                                    {{result.TypeName}}
+                                </span>
                             </li>
                         </ul>
                     </div>

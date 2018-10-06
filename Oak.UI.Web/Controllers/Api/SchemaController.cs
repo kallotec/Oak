@@ -49,6 +49,31 @@ namespace Oak.UI.Web.Controllers.Api
             }
         }
 
+
+        // GET api/schema/autocomplete
+        [HttpGet]
+        [Route("autocomplete")]
+        public async Task<IHttpActionResult> GetAutocomplete(ObjectType? filter = null)
+        {
+            try
+            {
+                // get results of search
+                var results = await graphService.GetAutocompleteObjectList(filter);
+
+                // map
+                return Ok(results.Select(r => new AutocompleteResult
+                {
+                    Type = r.ObjectType,
+                    Name = r.Name,
+                    TypeName = r.ObjectType.ToString()
+                }));
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
         // GET api/schema/dependencytree/?objName={objName}&direction={direction}
         [HttpGet]
         [Route("dependencytree")]
@@ -74,7 +99,7 @@ namespace Oak.UI.Web.Controllers.Api
 
                 // Get call tree from object if found
                 var obj = await graphService.GetCallTree(objName, (CallTreeDirection)direction);
-                if (obj != null)
+                if (obj != null && obj.Any())
                 {
                     var dic = new Dictionary<string, string[]>();
                     buildDependencyDic(obj, dic);
@@ -116,49 +141,6 @@ namespace Oak.UI.Web.Controllers.Api
                 definition.DefinitionText = await graphService.GetDefinition(objName);
 
                 return Ok(definition);
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(ex);
-            }
-        }
-
-
-        // GET api/schema/autocomplete
-        [HttpGet]
-        [Route("autocomplete")]
-        public async Task<IHttpActionResult> GetAutocomplete(ObjectType? filter = null)
-        {
-            try
-            {
-                //get results of search
-                var results = await graphService.GetAutocompleteObjectList(filter);
-
-                // map
-                return Ok(results.Select(r => r.Name));
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(ex);
-            }
-        }
-
-        // GET api/schema/autocomplete
-        [HttpGet]
-        [Route("autocomplete2")]
-        public async Task<IHttpActionResult> GetAutocomplete2(ObjectType? filter = null)
-        {
-            try
-            {
-                //get results of search
-                var results = await graphService.GetAutocompleteObjectList(filter);
-
-                // map
-                return Ok(results.Select(r => new AutocompleteResult
-                {
-                    Type = r.ObjectType,
-                    Name = r.Name
-                }));
             }
             catch (Exception ex)
             {

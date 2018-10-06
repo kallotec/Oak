@@ -1,5 +1,5 @@
 ﻿//configuration
-var autoCompleteDataUrl = "api/schema/autocomplete2";
+var autoCompleteDataUrl = "api/schema/autocomplete";
 var callTreeDataUrlFormat = "api/schema/dependencytree/?objName={0}&direction={1}";
 var definitionDataUrl = "api/schema/definition/?objName=";
 var messageLabel = null;
@@ -54,6 +54,24 @@ var app = new Vue({
         }
     },
     methods: {
+        onSearchButtonClick: function () {
+            this.showAutocomplete = false;
+            this.search();
+        },
+        onSuggestionClick: function (objName) {
+            this.searchText = objName;
+            this.showAutocomplete = false;
+        },
+        onSearchFieldKeyUp: function (e) {
+            // 13: enter
+            if (e.keyCode === 13) {
+                this.showAutocomplete = false;
+                this.search();
+            } else {
+                if (!this.showAutocomplete)
+                    this.showAutocomplete = true;
+            }
+        },
         search: function () {
 
             // needs at least 2 characters in box to search on
@@ -70,12 +88,16 @@ var app = new Vue({
                 this.displayMessage("Searching...");
 
                 //get graph json
-                $.getJSON(dataUrl, function (data) {
-                    graphComponent.displayGraph(data, this.searchText);
-                });
+                $.getJSON(dataUrl)
+                    .done(function (data) {
+                        graphComponent.displayGraph(data, this.searchText);
+                    })
+                    .fail(function () {
+                        this.displayMessage("A server error occurred when fetching tree data.");
+                    });
 
             } catch (e) {
-                this.displayMessage("Search failed.");
+                this.displayMessage("A server error occurred when fetching tree data.");
                 throw e;
             }
 
@@ -109,7 +131,7 @@ var app = new Vue({
                     })
                     .fail(function () {
 
-                        console.log("Getting definition data failed.");
+                        this.displayMessage("A server error occurred when fetching definition data.");
 
                         //display definition
                         me.currDefinitionText = "-- Sorry! The definition for this object could not be retrieved...";
@@ -117,7 +139,7 @@ var app = new Vue({
                     });
 
             } catch (e) {
-                this.displayMessage("Getting definition data failed.");
+                this.displayMessage("A server error occurred when fetching definition data.");
                 throw e;
             }
         },
@@ -155,21 +177,25 @@ var app = new Vue({
 
             this.displayMessage("Loading autocomplete data...");
 
-            $.getJSON(autoCompleteDataUrl, function (data) {
+            $.getJSON(autoCompleteDataUrl)
+                .done(function (data, status, xrh) {
 
-                console.log('autocomplete data', data);
+                    console.log('autocomplete data', data, status);
 
-                me.autocompleteListFull = data;
-                me.autocompleteListFiltered = data;
+                    me.autocompleteListFull = data;
+                    me.autocompleteListFiltered = data;
 
-                try {
-                    me.displayMessage(data.length + " database objects in schema");
-                }
-                catch (e) {
-                    me.displayMessage("Error fetching autocomplete data.");
-                    throw e;
-                }
-            });
+                    try {
+                        me.displayMessage(data.length + " database objects in schema");
+                    }
+                    catch (e) {
+                        me.displayMessage("A server error occurred when fetching autocomplete data.");
+                        throw e;
+                    }
+
+                }).fail(function () {
+                    me.displayMessage("A server error occurred when fetching autocomplete data.");
+                });
         },
         filterAutocomplete: function () {
 
@@ -190,21 +216,6 @@ var app = new Vue({
             });
 
             this.autocompleteListFiltered = matches;
-        },
-        onSuggestionClick: function (objName) {
-            this.searchText = objName;
-            this.search();
-            this.showAutocomplete = false;
-        },
-        searchFieldOnKeyUp: function (e) {
-            // 13: enter
-            if (e.keyCode === 13) {
-                this.showAutocomplete = false;
-                this.search();
-            } else {
-                if (!this.showAutocomplete)
-                    this.showAutocomplete = true;
-            }
         },
         displayMessage: function (msg) {
             console.log(msg);

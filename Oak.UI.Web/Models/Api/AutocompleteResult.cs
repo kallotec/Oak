@@ -8,7 +8,8 @@ namespace Oak.UI.Web.Models.Api
 {
     public class AutocompleteResult
     {
-        public ObjectType Type { get; set; }
         public string Name { get; set; }
+        public ObjectType Type { get; set; }
+        public string TypeName { get; set; }
     }
 }

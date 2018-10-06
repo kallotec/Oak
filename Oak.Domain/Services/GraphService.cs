@@ -22,20 +22,20 @@ namespace Oak.Domain.Services
         ISchemaFactory schemaGenerator;
 
 
-        public async Task<List<DbObject>> GetCallTree(string spName, CallTreeDirection direction)
+        public async Task<List<DbObject>> GetCallTree(string objName, CallTreeDirection direction)
         {
             var graph = await GenerateGraph();
             var tested = new List<string>();
 
             if (direction == CallTreeDirection.Up)
             {
-                var newObjectList = trimForUpwardOnlyReferences(graph.Objects, spName);
+                var newObjectList = trimForUpwardOnlyReferences(graph.Objects, objName);
                 graph.Objects = newObjectList;
                 return graph.Objects;
             }
             else
             {
-                var rootObj = graph.Objects.FirstOrDefault(o => o.Name == spName);
+                var rootObj = graph.Objects.FirstOrDefault(o => string.Equals(o.Name, objName, StringComparison.OrdinalIgnoreCase));
                 if (rootObj != null)
                     return new List<DbObject> { rootObj };
                 else
@@ -124,9 +124,9 @@ namespace Oak.Domain.Services
             if (list == null)
                 return new List<DbObject>();
 
-            var target = list.FirstOrDefault(l => l.Name == objectName);
+            var target = list.FirstOrDefault(l => string.Equals(l.Name, objectName, StringComparison.OrdinalIgnoreCase));
             if (target == null)
-                return list;
+                return new List<DbObject>();
 
             var dependentObjNames = new List<string>();
             getDependentObjectsNames(target, dependentObjNames);
@@ -134,7 +134,7 @@ namespace Oak.Domain.Services
             // Remove all redundant dependent links
             list.ForEach(r =>
             {
-                for (int x = 0; x < r.DependsOn.Count; x++)
+                for (var x = 0; x < r.DependsOn.Count; x++)
                 {
                     var obj = r.DependsOn[x];
                     if (!dependentObjNames.Contains(obj.Name))

@@ -67,7 +67,6 @@ html, body {
 #autocomplete-results ul {
     list-style-type: none;
     padding-left: 0px;
-    margin-top: 10px;
 }
 #autocomplete-results li:hover {
     background-color: #ddd;

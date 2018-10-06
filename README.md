@@ -1,21 +1,18 @@
-
-
 # Oak
 
-Searchable database object dependency visualizer tool for MS SQL Server.
+Searchable MS SQL Server database object dependency visualizer tool.
 
 ![Oak screenshot](http://kallotec.io/assets/images/projects/oak.png "Oak screenshot")
 
 ## Getting started
 
-In Web.config, update the connection string called `db` with a connection string to the database you'd like to analyze. And check that the cache time AppSettings value `cacheTimeInMinutes` is suitable.
-
-## Common sense
-
-Consider using a sql login with minimal permissions in this connection string. And it should go without saying this tool shouldn't be visible from outside of your local intranet.
+In Web.config, update the connection string called `db` with a connection string to the database you'd like to analyze.
 
 ## Roadmap
-- [ ] performance: caching of schema data
-- [ ] query option: return first-level nodes only 
-- [ ] definitions on double-click of tables/views
-- [ ] tables and views in autocomplete list
+
+- [ ] performance improvements for large schemas
+- [x] nice autocomplete gui showing object type, incl filter by type options
+- [x] walk direction selection: be able to see what an object references, or what objects reference it
+- [x] render direction: render as vertical or horizontal tree
+- [x] definitions on double-click of tables/views
+- [x] tables and views in autocomplete list

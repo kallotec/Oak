@@ -2,7 +2,7 @@
 
 Searchable MS SQL Server database object dependency visualizer tool.
 
-![Oak screenshot](http://kallotec.io/assets/images/projects/oak.png "Oak screenshot")
+![Oak screenshot](http://kallotec.io/assets/images/projects/oak.png#1 "Oak screenshot")
 
 ## Getting started
 

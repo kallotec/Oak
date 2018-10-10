@@ -43,10 +43,9 @@ namespace Oak.UI.Web.App_Start
 			// Config
 			Uri graphDbUrl = null;
 			var sqlConnString = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
-            var persistToGraphDb = false;
 
             // Data
-            ISchemaFactory dbObjService = new DbSchemaFactory(graphDbUrl, sqlConnString, persistToGraphDb);
+            ISchemaFactory dbObjService = new DbSchemaFactory(graphDbUrl, sqlConnString);
 			container.RegisterInstance(dbObjService);
 
             // Services
@@ -57,7 +56,6 @@ namespace Oak.UI.Web.App_Start
                 new InjectionConstructor(
                     int.Parse(ConfigurationManager.AppSettings["cacheTimeInMinutes"]),
                     container.Resolve<GraphService>() ));
-
         }
 
     }

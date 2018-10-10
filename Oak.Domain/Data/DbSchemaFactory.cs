@@ -12,7 +12,7 @@ namespace Oak.Domain.Data
 {
     public class DbSchemaFactory : ISchemaFactory
     {
-        public DbSchemaFactory(Uri GraphApiUrl, string SqlConnString, bool PersistToGraphDb = false)
+        public DbSchemaFactory(Uri GraphApiUrl, string SqlConnString)
         {
             sqlConnString = SqlConnString;
             graphApiUrl = GraphApiUrl;

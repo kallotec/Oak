@@ -10,7 +10,6 @@ using Oak.Domain.Models;
 
 namespace Oak.Domain.Services
 {
-    public enum CallTreeDirection { Down, Up }
 
     public class GraphService
     {
@@ -22,76 +21,34 @@ namespace Oak.Domain.Services
         ISchemaFactory schemaGenerator;
 
 
-        public async Task<List<DbObject>> GetCallTree(string objName, CallTreeDirection direction)
+        public async Task<DbGraph> GenerateDbObjectGraph()
         {
-            var graph = await GenerateGraph();
-            var tested = new List<string>();
+            var graphItems = new List<DbObject>();
 
-            if (direction == CallTreeDirection.Up)
-            {
-                var newObjectList = trimForUpwardOnlyReferences(graph.Objects, objName);
-                graph.Objects = newObjectList;
-                return graph.Objects;
-            }
-            else
-            {
-                var rootObj = graph.Objects.FirstOrDefault(o => string.Equals(o.Name, objName, StringComparison.OrdinalIgnoreCase));
-                if (rootObj != null)
-                    return new List<DbObject> { rootObj };
-                else
-                    return new List<DbObject>();
-            }
-
-        }
-
-		public Task<string> GetDefinition(string objName) 
-		{
-			return schemaGenerator.GetDefinition(objName);
-		}
-
-        public async Task<List<DbObject>> GetAutocompleteObjectList(ObjectType? filter = null)
-        {
-            var graph = await GenerateGraph();
-
-            //only return SP's in autocomplete list
-            var filteredToSps = graph.Objects
-                                     .Where(o => (filter != null 
-                                        ? o.ObjectType == filter 
-                                        : o.ObjectType != ObjectType.Unknown))
-									 .ToList();
-			return filteredToSps;
-		}
-
-        public async Task<DbGraph> GenerateGraph()
-        {
             //get schema
-            var schema = await getSchema();
-            List<DbObjectInfo> objectInfos = schema.Objects;
-            List<DbObjectReferenceRow> refTable = schema.References;
-
-            List<DbObject> graph = new List<DbObject>();
+            var schema = await schemaGenerator.BuildSchemaAsync();
 
             //collect all db objects
-            foreach (var obj in objectInfos)
+            foreach (var obj in schema.Objects)
             {
                 //ensure isnt already inserted
-                var source = graph.FirstOrDefault(r => r.Name == obj.fullName);
+                var source = graphItems.FirstOrDefault(r => r.Name == obj.fullName);
                 if (source == null)
                 {
                     source = Mapper.Map(obj);
-                    graph.Add(source);
+                    graphItems.Add(source);
                 }
             }
 
             //merge into mapped lists
-            foreach (var reference in refTable)
+            foreach (var reference in schema.References)
             {
                 //try get both source and target from graph
-                var source = graph.FirstOrDefault(r => r.Name == reference.fromFullName);
-                var target = graph.FirstOrDefault(r => r.Name == reference.toFullName);
+                var source = graphItems.FirstOrDefault(r => r.Name == reference.fromFullName);
+                var target = graphItems.FirstOrDefault(r => r.Name == reference.toFullName);
 
                 //ensure both from and to objects exist in object list
-				//and that the source isnt referencing the target (causes infinite loop)
+                //and that the source isnt referencing the target (causes infinite loop)
                 if (source == null || target == null || source.Name == target.Name)
                     continue;
 
@@ -101,62 +58,22 @@ namespace Oak.Domain.Services
                     source.DependsOn.Add(target);
                     target.DependedOnBy.Add(source);
                 }
-                
+
             }
 
             var graphObj = new DbGraph
             {
-                Objects = graph,
+                Objects = graphItems,
                 CapturedUtc = DateTime.UtcNow,
             };
 
             return graphObj;
         }
 
-        async Task<DbSchema> getSchema()
-        {
-			var schema = await schemaGenerator.BuildSchemaAsync();
-            return schema;
-        }
-
-        List<DbObject> trimForUpwardOnlyReferences(List<DbObject> list, string objectName)
-        {
-            if (list == null)
-                return new List<DbObject>();
-
-            var target = list.FirstOrDefault(l => string.Equals(l.Name, objectName, StringComparison.OrdinalIgnoreCase));
-            if (target == null)
-                return new List<DbObject>();
-
-            var dependentObjNames = new List<string>();
-            getDependentObjectsNames(target, dependentObjNames);
-
-            // Remove all redundant dependent links
-            list.ForEach(r =>
-            {
-                for (var x = 0; x < r.DependsOn.Count; x++)
-                {
-                    var obj = r.DependsOn[x];
-                    if (!dependentObjNames.Contains(obj.Name))
-                    {
-                        r.DependsOn.RemoveAt(x);
-                        x--;
-                    }
-                }
-                
-            });
-
-            // Only get dependent links
-            var results = list.Where(l => dependentObjNames.Contains(l.Name)).ToList();
-
-            return results;
-        }
-
-        void getDependentObjectsNames(DbObject obj, List<string> collector)
-        {
-            collector.Add(obj.Name);
-            obj.DependedOnBy.ForEach(d => getDependentObjectsNames(d, collector));
-        }
-
+		public Task<string> GetDefinition(string objName)
+		{
+			return schemaGenerator.GetDefinitionAsync(objName);
+		}
+        
 	}
 }

@@ -12,23 +12,21 @@ namespace Oak.Domain.Data
 {
     public class DbSchemaFactory : ISchemaFactory
     {
-		public DbSchemaFactory(Uri GraphApiUrl, string SqlConnString, bool PersistToGraphDb = false)
+        public DbSchemaFactory(Uri GraphApiUrl, string SqlConnString, bool PersistToGraphDb = false)
         {
             sqlConnString = SqlConnString;
             graphApiUrl = GraphApiUrl;
-            persistToGraphDb = PersistToGraphDb;
         }
 
         string sqlConnString;
         Uri graphApiUrl;
-        bool persistToGraphDb;
-		DbSchema schema;
+        DbSchema schema;
 
 
         public async Task<DbSchema> BuildSchemaAsync()
         {
-			if (schema != null)
-				return schema;
+            if (schema != null)
+                return schema;
 
             List<DbObjectInfo> objectInfoList = null;
             List<DbObjectReferenceRow> referenceTable = null;
@@ -39,21 +37,22 @@ namespace Oak.Domain.Data
                 objectInfoList = (await conn.QueryAsync<DbObjectInfo>(getQuery_SpData())).ToList();
                 referenceTable = (await conn.QueryAsync<DbObjectReferenceRow>(getQuery_SpReferenceTable())).ToList();
             }
-            
+
             //refTable complete
-			return schema = new DbSchema 
+            return schema = new DbSchema
             {
                 Objects = objectInfoList,
                 References = referenceTable,
             };
         }
 
-		public async Task<string> GetDefinition(string objectName) {
+        public async Task<string> GetDefinitionAsync(string objectName)
+        {
+            var definition = string.Empty;
 
-			var definition = string.Empty;
-
-			//get reference table from sql
-			using (IDbConnection conn = new SqlConnection(sqlConnString)) {
+            //get reference table from sql
+            using (IDbConnection conn = new SqlConnection(sqlConnString))
+            {
 
                 var query = getQuery_ObjDefinition(objectName);
                 var reader = await conn.ExecuteReaderAsync(query);
@@ -63,10 +62,10 @@ namespace Oak.Domain.Data
                     sb.Append(reader.GetString(0));
 
                 definition = string.Join(Environment.NewLine, sb.ToString());
-			}
-            
-			return definition;
-		}
+            }
+
+            return definition;
+        }
 
         string getQuery_SpData()
         {
@@ -131,7 +130,8 @@ namespace Oak.Domain.Data
 	                    @references r";
         }
 
-		string getQuery_ObjDefinition(string objectName) {
+        string getQuery_ObjDefinition(string objectName)
+        {
             //return @"select OBJECT_DEFINITION(object_id('" + objectName + "'))";
             return @"sp_helptext '" + objectName + "'";
         }

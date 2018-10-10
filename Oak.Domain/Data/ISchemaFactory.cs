@@ -10,6 +10,6 @@ namespace Oak.Domain.Data
     public interface ISchemaFactory
     {
         Task<DbSchema> BuildSchemaAsync();
-		Task<string> GetDefinition(string objectName);
+		Task<string> GetDefinitionAsync(string objectName);
     }
 }

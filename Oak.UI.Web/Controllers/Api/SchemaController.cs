@@ -12,6 +12,7 @@ using System.Web.Http;
 using Oak.Domain.Models;
 using Oak.Domain.Services;
 using Oak.UI.Web.Models.Api;
+using static Oak.Domain.Models.DbGraph;
 
 namespace Oak.UI.Web.Controllers.Api
 {
@@ -57,8 +58,13 @@ namespace Oak.UI.Web.Controllers.Api
         {
             try
             {
-                // get results of search
-                var results = await graphService.GetAutocompleteObjectList(filter);
+                var graph = await getDbGraphAsync();
+
+                var results = graph.Objects;
+
+                // filter
+                if (filter != null)
+                    results = graph.Objects.Where(o => o.ObjectType == filter.Value).ToList();
 
                 // map
                 return Ok(results.Select(r => new AutocompleteResult
@@ -87,18 +93,10 @@ namespace Oak.UI.Web.Controllers.Api
                 if (string.IsNullOrEmpty(objName))
                     return Ok(callTree);
 
-                // Try get graph from cache
-                DbGraph graph = cachedGraph;
-
-                // Load graph if not cached
-                if (graph == null)
-                {
-                    graph = await graphService.GenerateGraph();
-                    cachedGraph = graph; // Persist to cache
-                }
+                var graph = await getDbGraphAsync();
 
                 // Get call tree from object if found
-                var obj = await graphService.GetCallTree(objName, (CallTreeDirection)direction);
+                var obj = graph.GetCallTree(objName, (CallTreeDirection)direction);
                 if (obj != null && obj.Any())
                 {
                     var dic = new Dictionary<string, string[]>();
@@ -164,6 +162,21 @@ namespace Oak.UI.Web.Controllers.Api
             }
         }
 
+
+        async Task<DbGraph> getDbGraphAsync()
+        {
+            // Try get graph from cache
+            var graph = cachedGraph;
+
+            // Load graph if not cached
+            if (graph == null)
+            {
+                graph = await graphService.GenerateDbObjectGraph();
+                cachedGraph = graph; // cache
+            }
+
+            return graph;
+        }
 
         void buildDependencyDic(List<DbObject> objs, Dictionary<string, string[]> dic)
         {

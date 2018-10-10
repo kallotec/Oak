@@ -49,7 +49,7 @@ namespace Oak.Domain.Data
             return schemaCached;
         }
 
-		public Task<string> GetDefinition(string objectName) 
+		public Task<string> GetDefinitionAsync(string objectName) 
 		{
 			throw new NotImplementedException();
 		}

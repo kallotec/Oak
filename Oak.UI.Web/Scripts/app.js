@@ -18,7 +18,8 @@ var app = new Vue({
         filterShowFunctions: true, // typeId: 4
         autocompleteListFull: [],
         autocompleteListFiltered: [],
-        currDefinitionText: ''
+        currDefinitionText: '',
+        maxItemsInAutocompleteList: 20
     },
     created: function () {
 
@@ -205,17 +206,17 @@ var app = new Vue({
 
             $.each(this.autocompleteListFull, function (i, item) {
                 if (substrRegex.test(item.Name)) {
-                    var isMatch = (me.filterShowProcs && item.Type == 1)
-                        || (me.filterShowTables && item.Type == 2)
-                        || (me.filterShowViews && item.Type == 3)
-                        || (me.filterShowFunctions && item.Type == 4);
+                    var isMatch = (me.filterShowProcs && item.Type === 1)
+                        || (me.filterShowTables && item.Type === 2)
+                        || (me.filterShowViews && item.Type === 3)
+                        || (me.filterShowFunctions && item.Type === 4);
                     if (isMatch) {
                         matches.push(item);
                     }
                 }
             });
 
-            this.autocompleteListFiltered = matches;
+            this.autocompleteListFiltered = matches.slice(0, this.maxItemsInAutocompleteList);
         },
         displayMessage: function (msg) {
             console.log(msg);
